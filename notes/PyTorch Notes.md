@@ -19,14 +19,16 @@ torch.rand(5,3) #for Uniform distribution (in the half-open interval [0.0, 1.0)
 torch.randn(5,3) #for Standard Normal (aka. Gaussian) distribution (mean 0 and variance 1)
 ```
 
-![[Pasted image 20240922203258.png]]
+![image](https://github.com/user-attachments/assets/69ede2fb-1383-4c18-9ff9-a443e2cfa334)
+
 
 
 Tensor shape and size
 `tensor.shape()` or `tensor.size`
 `.ndim` gives the number of dimensions. (also, no. of brackets on one side = no. of dimensions)
-![[Pasted image 20240924023345.png]]
-![[Pasted image 20240924021409.png]]
+![image](https://github.com/user-attachments/assets/ad12019b-2200-40e6-b63c-cec438439b43)
+
+![image](https://github.com/user-attachments/assets/8bd08cbc-bcc3-4a3c-8225-166a502c3079)
 
 Accessing tensor
 ```
@@ -72,4 +74,4 @@ This is helpful incase you just want the position where the highest (or lowest) 
 
 
 Reshaping, Stacking, Squeezing and Unsqueezing
-![[Pasted image 20240924142429.png]]
+![image](https://github.com/user-attachments/assets/75048a33-7553-4683-ba02-4ef9d8c56357)
