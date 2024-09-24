@@ -2,7 +2,8 @@ Each KWS model has 3 major components:
 1. feature extraction module
 2. DNN
 3. posterior handling module
-![image](https://github.com/user-attachments/assets/0ce7e873-7d81-463b-bab6-fccaa29842ae)
+![image](https://github.com/user-attachments/assets/ace91ff7-0d3e-4a18-8fdc-58c3ce17241c)
+
 
 KWS system is always-on.
 It should have very low power consumption to maximize battery life.
