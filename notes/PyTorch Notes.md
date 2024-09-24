@@ -26,8 +26,9 @@ torch.randn(5,3) #for Standard Normal (aka. Gaussian) distribution (mean 0 and v
 Tensor shape and size
 `tensor.shape()` or `tensor.size`
 `.ndim` gives the number of dimensions. (also, no. of brackets on one side = no. of dimensions)
-![image](https://github.com/user-attachments/assets/ad12019b-2200-40e6-b63c-cec438439b43)
 
+![image](https://github.com/user-attachments/assets/ad12019b-2200-40e6-b63c-cec438439b43)
+<br>
 ![image](https://github.com/user-attachments/assets/8bd08cbc-bcc3-4a3c-8225-166a502c3079)
 
 Accessing tensor
