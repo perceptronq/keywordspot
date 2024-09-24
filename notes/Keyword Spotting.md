@@ -2,14 +2,15 @@ Each KWS model has 3 major components:
 1. feature extraction module
 2. DNN
 3. posterior handling module
-   ![](keywordspot/notes/Pasted image 20240921212210.png)
+![image](https://github.com/user-attachments/assets/0ce7e873-7d81-463b-bab6-fccaa29842ae)
 
 KWS system is always-on.
 It should have very low power consumption to maximize battery life.
 KWS system should detect the keywords with high accuracy and low latency.
 
 Dimensionality compression of input audio signal is done by converting it to Mel Spectrograms.
-![[keywordspot/notes/Pasted image 20240921211633.png]]
+![image](https://github.com/user-attachments/assets/f8755bb7-85a3-47e3-b28a-00cb6ddef0fc)
+
 In a real-world scenario where keywords need to be identified from a continuous audio stream, a posterior handling module averages the output probabilities of each output class over a period of time, improving the overall confidence of the prediction.
 
 Different techniques for KWS and their cons:
