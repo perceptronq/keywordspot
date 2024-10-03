@@ -12,17 +12,15 @@ from torchaudio.transforms import MFCC
 BATCH_SIZE = 32
 EPOCHS = 20
 LEARNING_RATE = 0.001
-NUM_CLASSES = 2  # "cat" and "dog"
+NUM_CLASSES = 5
 SAMPLE_RATE = 16000
 N_MFCC = 40
-MAX_LEN = 81  # Adjust according to your dataset (number of time steps in MFCC)
+MAX_LEN = 81  
 
-# Paths (replace with correct paths for your Kaggle environment)
-DATA_DIR = '/kaggle/input/google-speech-commands'
+DATA_DIR = '/home/mayankch283/Downloads/speech_commands_v0.02'
 BACKGROUND_NOISE_DIR = os.path.join(DATA_DIR, "_background_noise_")
-TARGET_KEYWORDS = ["cat", "dog"]
+TARGET_KEYWORDS = ["cat", "dog", "bird", "yes", "no"]
 
-# Custom Dataset
 class SpeechCommandsDataset(Dataset):
     def __init__(self, data_dir, keywords, transform=None, augment_noise=False):
         self.data_dir = data_dir
@@ -42,22 +40,23 @@ class SpeechCommandsDataset(Dataset):
     def __getitem__(self, idx):
         audio_path, label = self.audio_files[idx]
         waveform, sample_rate = torchaudio.load(audio_path)
-
+        
         if self.augment_noise:
             noise_waveform, _ = torchaudio.load(np.random.choice(self.noise_files))
             noise_waveform = noise_waveform[:, :waveform.size(1)]  # match length
             waveform += noise_waveform * 0.005  # small noise
-
+        
         if self.transform:
             waveform = self.transform(waveform)
-
+        
         waveform = self.pad_or_truncate(waveform)
-
+        
         # Expand to 3 channels by duplicating across the channel dimension
         waveform = waveform.expand(3, -1, -1)
-
-        label = 0 if label == "cat" else 1  # Label encoding
-        return waveform, label
+        
+        # Convert keyword label to an index
+        label_idx = TARGET_KEYWORDS.index(label)
+        return waveform, label_idx
 
 
     def pad_or_truncate(self, mfcc):
@@ -83,7 +82,7 @@ val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False)
 
 # Model (Transfer Learning with MobileNetV2)
 model = models.mobilenet_v2(pretrained=True)
-model.classifier[1] = nn.Linear(model.last_channel, NUM_CLASSES)  # Modify final layer for binary classification
+model.classifier[1] = nn.Linear(model.last_channel, NUM_CLASSES)  # Modify final layer
 
 # Training Setup
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
