@@ -4,39 +4,37 @@ import pyaudio
 import numpy as np
 from torchvision import models
 from torchaudio.transforms import MFCC
-
-import numpy as np
 import torch.nn as nn
 
-# Load the trained model
 model = models.mobilenet_v2(pretrained=False)
-model.classifier[1] = nn.Linear(model.last_channel, 2)  # Update the classifier to 2 classes
-model.load_state_dict(torch.load("keyword_spotting_mobilenetv2.pth"))
+model.classifier[1] = nn.Linear(model.last_channel, 5)  # Update the classifier to 5 classes
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model.load_state_dict(torch.load("keyword_spotting_mobilenetv2.pth", map_location=device))
+model.to(device)
 model.eval()
 
-# Audio settings
-SAMPLE_RATE = 16000  # Must match the sample rate used in training
-N_MFCC = 40          # Must match the number of MFCC coefficients
-MAX_LEN = 81         # Must match the input length to the model
-CHUNK = int(SAMPLE_RATE * 1)  # 1-second chunks for real-time processing
+SAMPLE_RATE = 16000
+N_MFCC = 40  
+MAX_LEN = 81
+CHUNK = int(SAMPLE_RATE * 0.5)
 
-# MFCC transformation (same as during training)
 mfcc_transform = MFCC(sample_rate=SAMPLE_RATE, n_mfcc=N_MFCC)
 
-# Initialize pyaudio to capture audio from the microphone
 p = pyaudio.PyAudio()
-stream = p.open(format=pyaudio.paInt16,
+stream = p.open(format=pyaudio.paFloat32,
                 channels=1,
                 rate=SAMPLE_RATE,
                 input=True,
                 frames_per_buffer=CHUNK)
 
-print("Listening...")
+print("Listening for keywords: cat, dog, bird, yes, no...")
 
 def preprocess_audio(audio_data):
     """Preprocess raw audio data into MFCC features"""
-    audio_tensor = torch.FloatTensor(audio_data).unsqueeze(0)  # Add batch dimension
+    audio_tensor = torch.FloatTensor(audio_data).unsqueeze(0)  
     mfcc = mfcc_transform(audio_tensor)
+    
     # Pad or truncate to match the input length for the model
     if mfcc.size(2) < MAX_LEN:
         pad_size = MAX_LEN - mfcc.size(2)
@@ -51,28 +49,26 @@ def preprocess_audio(audio_data):
 def predict_keyword(mfcc):
     """Run inference on the model to predict the keyword"""
     with torch.no_grad():
+        mfcc = mfcc.to(device)  # Move input to the same device as the model
         outputs = model(mfcc)
+        probabilities = torch.nn.functional.softmax(outputs, dim=1)
         _, predicted = torch.max(outputs, 1)
-        return predicted.item()
+    return predicted.item(), probabilities[0]
+
+KEYWORDS = ['cat', 'dog', 'bird', 'yes', 'no']
 
 try:
     while True:
-        # Capture audio
-        audio_data = np.frombuffer(stream.read(CHUNK), dtype=np.int16)
-        
-        # Preprocess audio data into MFCC features
-        mfcc = preprocess_audio(audio_data)
-        
-        # Run inference to predict keyword
-        prediction = predict_keyword(mfcc)
-        
-        if prediction == 0:
-            print("Detected: Cat")
-        elif prediction == 1:
-            print("Detected: Dog")
+        audio_data = np.frombuffer(stream.read(CHUNK), dtype=np.float32)
+        mfcc = preprocess_audio(audio_data)        
+        prediction, probabilities = predict_keyword(mfcc)
+        confidence_threshold = 0.7
+        if probabilities[prediction].item() > confidence_threshold:
+            detected_keyword = KEYWORDS[prediction]
+            confidence = probabilities[prediction].item()
+            print(f"Detected: {detected_keyword} (Confidence: {confidence:.2f})")
 
 except KeyboardInterrupt:
-    # Stop the stream and close pyaudio
     print("Stopping...")
     stream.stop_stream()
     stream.close()
