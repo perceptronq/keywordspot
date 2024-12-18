@@ -1,0 +1,12 @@
+Classification Report:
+              precision    recall  f1-score   support
+
+        bird       0.69      1.00      0.81       346
+       happy       0.99      0.55      0.71       349
+
+    accuracy                           0.77       695
+   macro avg       0.84      0.77      0.76       695
+weighted avg       0.84      0.77      0.76       695
+
+
+time taken to train: 8 min 38 sec.
